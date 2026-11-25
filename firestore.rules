@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Regole di sicurezza per la modalità condivisa (Firebase).
+// Sostituisci gli indirizzi email con quelli delle persone che usano il calendario.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function member() {
+      return request.auth != null
+        && request.auth.token.email in ['tu@example.com', 'partner@example.com'];
+    }
+    function self(uid) {
+      return member() && request.auth.uid == uid;
+    }
+
+    // Calendario personale: tutti i membri lo leggono, solo il proprietario lo modifica.
+    match /cal/{uid} {
+      allow read: if member();
+      allow write: if self(uid);
+
+      match /events/{eventId} {
+        allow read: if member();
+        allow write: if self(uid);
+      }
+    }
+
+    // Impegni "Insieme": letti e modificati da entrambi.
+    match /shared/{eventId} {
+      allow read, write: if member();
+    }
+
+    // Impegni privati e preferenze grafiche: visibili solo al proprietario.
+    match /data/users/{uid}/{docId} {
+      allow read, write: if self(uid);
+    }
+  }
+}

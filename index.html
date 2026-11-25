@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Calendario personale e di coppia: impegni pubblici, privati e condivisi, temi personalizzabili, inserimento rapido in linguaggio naturale.">
+<title>Il mio calendario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <div class="hrow">
+      <button class="ib plain" id="prev" type="button" aria-label="Precedente"><svg width="20" height="20" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <h1 class="ptitle" id="period">Calendario</h1>
+      <button class="ib plain" id="next" type="button" aria-label="Successivo"><svg width="20" height="20" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="btn" id="today" type="button">Oggi</button>
+      <button class="ib" id="open-set" type="button" aria-label="Personalizza"><svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 0 0 0 13c.9 0 1.4-.6 1.4-1.3 0-.4-.2-.7-.4-1-.2-.3-.4-.6-.4-1 0-.7.6-1.3 1.3-1.3h1.5A3.1 3.1 0 0 0 14.5 6.8C14.5 3.9 11.6 1.5 8 1.5Z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="4.8" cy="7.6" r="1" fill="currentColor"/><circle cx="7" cy="4.7" r="1" fill="currentColor"/><circle cx="10.4" cy="5.2" r="1" fill="currentColor"/></svg></button>
+    </div>
+    <div class="seg" role="tablist" aria-label="Vista">
+      <button type="button" role="tab" data-view="month">Mese</button>
+      <button type="button" role="tab" data-view="agenda">Agenda</button>
+      <button type="button" role="tab" data-view="day">Giorno</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+  <div class="chips filters" id="filters" role="group" aria-label="Mostra"></div>
+  <main id="main"></main>
+</div>
+
+<button class="fab" id="fab" type="button" aria-label="Nuovo impegno" hidden><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+<div class="toast" id="toast" role="status" hidden><span id="toast-t"></span><button type="button" id="toast-undo" hidden>Annulla</button></div>
+
+<!-- editor -->
+<div class="scrim" id="ed" hidden>
+  <form class="sheet tall" id="form" novalidate role="dialog" aria-modal="true" aria-labelledby="ed-title">
+    <div class="sh-h">
+      <button type="button" class="tb" id="ed-cancel">Annulla</button>
+      <h2 id="ed-title">Nuovo impegno</h2>
+      <button type="submit" class="btn primary" id="ed-save">Salva</button>
+    </div>
+    <p class="sh-err" id="f-err" role="alert" hidden></p>
+    <div class="sh-b">
+      <input id="f-title" class="big" type="text" maxlength="120" autocomplete="off" enterkeyhint="done" placeholder="Es. Cena domani alle 20" aria-label="Titolo">
+      <p class="qhint" id="qhint" hidden></p>
+
+      <label class="sw-row" id="tog-row" for="f-tog"><span><b id="tog-label">Insieme</b><small>Compare nel calendario di entrambi e potete modificarlo tutti e due.</small></span><input type="checkbox" class="switch" id="f-tog"></label>
+
+      <div class="fld" id="vis-wrap">
+        <span class="lbl">Chi lo vede</span>
+        <div class="seg" role="radiogroup" aria-label="Chi lo vede">
+          <button type="button" role="radio" data-vis="pub">Pubblico</button>
+          <button type="button" role="radio" data-vis="prv">Solo io</button>
+        </div>
+        <small class="muted" id="vis-note"></small>
+      </div>
+
+      <div class="fld">
+        <span class="lbl">Giorni</span>
+        <div class="seg" role="radiogroup" aria-label="Giorni">
+          <button type="button" role="radio" data-dm="one">Un giorno</button>
+          <button type="button" role="radio" data-dm="range">Di fila</button>
+          <button type="button" role="radio" data-dm="multi">Sparsi</button>
+        </div>
+      </div>
+      <div class="fld" id="one-wrap">
+        <label for="f-date" id="date-lbl">Giorno</label>
+        <div class="chips" id="qdates"></div>
+        <input type="date" id="f-date">
+      </div>
+      <div class="fld" id="range-wrap">
+        <label for="f-enddate">Fino al giorno</label>
+        <input type="date" id="f-enddate">
+      </div>
+      <div class="fld" id="multi-wrap">
+        <div class="mcal" id="mcal"></div>
+        <p class="msum" id="msum"></p>
+      </div>
+
+      <label class="sw-row" for="f-allday"><span><b>Tutto il giorno</b></span><input type="checkbox" class="switch" id="f-allday"></label>
+
+      <div class="fld" id="time-wrap">
+        <div class="two">
+          <div class="fld"><label for="f-start">Inizio</label><input type="time" id="f-start"></div>
+          <div class="fld"><label for="f-end">Fine</label><input type="time" id="f-end"></div>
+        </div>
+        <div class="chips" id="durs">
+          <button type="button" class="chip" data-dur="30">30 min</button>
+          <button type="button" class="chip" data-dur="60">1 ora</button>
+          <button type="button" class="chip" data-dur="90">1 ora e ½</button>
+          <button type="button" class="chip" data-dur="120">2 ore</button>
+          <button type="button" class="chip" data-dur="180">3 ore</button>
+          <button type="button" class="chip" data-dur="240">4 ore</button>
+        </div>
+      </div>
+
+
+      <div class="fld">
+        <span class="lbl">Ripeti</span>
+        <div class="chips wrap" id="reps"></div>
+      </div>
+
+      <div class="fld">
+        <span class="lbl">Icona</span>
+        <div class="chips emo" id="emos"></div>
+      </div>
+
+      <div class="fld"><label for="f-place">Luogo</label><input id="f-place" type="text" maxlength="120" autocomplete="off" enterkeyhint="done"></div>
+      <div class="fld"><label for="f-notes">Note</label><textarea id="f-notes" maxlength="1000"></textarea></div>
+    </div>
+    <div class="sh-f" id="ed-foot" hidden></div>
+  </form>
+</div>
+
+<!-- detail -->
+<div class="scrim" id="dt" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dt-h">
+    <div class="sh-h">
+      <button type="button" class="tb" id="dt-close">Chiudi</button>
+      <h2 id="dt-h">Impegno</h2>
+      <button type="button" class="btn primary" id="dt-edit">Modifica</button>
+    </div>
+    <div class="sh-b dt" id="dt-body"></div>
+    <div class="sh-f" id="dt-foot"></div>
+  </div>
+</div>
+
+<!-- personalise -->
+<div class="scrim" id="st" hidden>
+  <div class="sheet tall" role="dialog" aria-modal="true" aria-labelledby="st-h">
+    <div class="sh-h">
+      <button type="button" class="tb" id="st-reset">Ripristina</button>
+      <h2 id="st-h">Personalizza</h2>
+      <button type="button" class="btn primary" id="st-done">Fatto</button>
+    </div>
+    <div class="sh-b" id="st-body"></div>
+    <div class="sh-f"><span class="status" id="st-status" role="status">Tema, caratteri e forma li vedi solo tu.</span></div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
