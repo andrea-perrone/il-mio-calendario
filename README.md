@@ -10,6 +10,9 @@ personalizzare con 18 temi, 13 set di caratteri e 6 stili per gli impegni.
 Funziona subito in locale (dati salvati nel browser) e, se vuoi usarla in due, si
 collega a Firebase per la sincronizzazione in tempo reale.
 
+**▶ Demo online: [andrea-perrone.github.io/il-mio-calendario](https://andrea-perrone.github.io/il-mio-calendario/)**
+(in modalità locale: gli impegni che crei restano solo nel tuo browser)
+
 ---
 
 ## Indice
